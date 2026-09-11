@@ -1,0 +1,3461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planejamento de Finanças - Dashboard</title>
+
+    <style>
+        :root {
+            --bg-dark: #000000;
+            --card-bg: #070d09;
+            --primary-green: #1b3022;
+            --accent-green: #3b533d;
+            --neon-green: #4ade80;
+            --gold-light: #fde047;
+            --gold-dark: #ca8a04;
+            --success: #4ade80;
+            --danger: #f87171;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --border: rgba(85, 124, 86, 0.3);
+            --shadow: rgba(0, 255, 100, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ==============================
+           TÍTULO
+        ============================== */
+
+        .hero-title {
+            text-align: center;
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                var(--gold-light),
+                var(--neon-green),
+                var(--gold-light)
+            );
+            background-size: 300% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation:
+                shine 4s linear infinite,
+                float 6s ease-in-out infinite;
+            text-shadow: 0 0 25px rgba(74, 222, 128, 0.2);
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 300% center;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* ==============================
+           NAVEGAÇÃO DAS ABAS
+        ============================== */
+
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            box-shadow:
+                inset 0 2px 6px rgba(0, 0, 0, 0.8),
+                0 0 15px var(--shadow);
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 40px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 0;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #000000;
+            background: linear-gradient(
+                135deg,
+                var(--gold-light),
+                var(--gold-dark)
+            );
+            box-shadow: 0 0 20px rgba(253, 224, 71, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* ==============================
+           SISTEMA DE ABAS
+           CORREÇÃO PRINCIPAL
+        ============================== */
+
+        .tab-content {
+            display: none !important;
+            opacity: 0;
+            visibility: hidden;
+            width: 100%;
+        }
+
+        .tab-content.active {
+            display: block !important;
+            opacity: 1;
+            visibility: visible;
+            animation: tabFadeIn 0.25s ease;
+        }
+
+        .tab-content.active.use-grid {
+            display: grid !important;
+        }
+
+        /* hidden sempre vence qualquer outra regra */
+        .tab-content[hidden] {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+
+        @keyframes tabFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ==============================
+           GRID
+        ============================== */
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (min-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+
+        /* ==============================
+           CARDS
+        ============================== */
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.9),
+                inset 0 0 15px rgba(27, 48, 34, 0.2);
+            backdrop-filter: blur(12px);
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                var(--neon-green),
+                transparent
+            );
+            opacity: 0.3;
+        }
+
+        .card h2 {
+    position: relative;
+    color: transparent;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-top: 0;
+    margin-bottom: 18px;
+    padding-bottom: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+
+    /* Mesmo efeito visual do título principal */
+    background: linear-gradient(
+        90deg,
+        #ffffff,
+        var(--gold-light),
+        var(--neon-green),
+        var(--gold-light),
+        #ffffff
+    );
+
+    background-size: 300% auto;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    animation:
+        shine-card 4s linear infinite,
+        float-card 6s ease-in-out infinite;
+
+    text-shadow:
+        0 0 12px rgba(74, 222, 128, 0.15);
+}
+
+/* Linha inferior do título */
+.card h2::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--neon-green),
+        var(--gold-light),
+        var(--neon-green),
+        transparent
+    );
+
+    background-size: 300% 100%;
+
+    animation: shine-line 4s linear infinite;
+
+    opacity: 0.7;
+}
+
+/* Brilho passando pelo texto */
+@keyframes shine-card {
+    0% {
+        background-position: 0% center;
+    }
+
+    100% {
+        background-position: 300% center;
+    }
+}
+
+/* Movimento suave igual ao título principal,
+   porém mais discreto */
+@keyframes float-card {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Brilho passando pela linha inferior */
+@keyframes shine-line {
+    0% {
+        background-position: 0% center;
+    }
+
+    100% {
+        background-position: 300% center;
+    }
+}
+
+        /* ==============================
+           FLEX
+        ============================== */
+
+        .flex {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .flex-1 {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        /* ==============================
+           FORMULÁRIOS
+        ============================== */
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input,
+        select,
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #030604;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-submit {
+            background: linear-gradient(
+                135deg,
+                var(--primary-green),
+                var(--accent-green)
+            );
+            color: #ffffff;
+            border: 1px solid var(--neon-green);
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.1);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
+            background: linear-gradient(
+                135deg,
+                var(--accent-green),
+                var(--primary-green)
+            );
+        }
+
+        /* ==============================
+           TABELA
+        ============================== */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--gold-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        /* ==============================
+           SALDO
+        ============================== */
+
+        .summary-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .positivo {
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .negativo {
+            color: var(--danger);
+            text-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+        }
+
+        /* ==============================
+           BOTÃO EXCLUIR
+        ============================== */
+
+        .btn-delete {
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+        }
+
+        /* ==============================
+           GRÁFICOS
+        ============================== */
+
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        canvas {
+            max-width: 100%;
+            filter: drop-shadow(
+                0 0 15px rgba(0, 255, 100, 0.1)
+            );
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .badge {
+            background: rgba(245, 215, 110, 0.15);
+            color: var(--gold-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+            border: 1px solid rgba(245, 215, 110, 0.3);
+        }
+
+        /* ==============================
+           RESUMO FINAL
+        ============================== */
+
+        .history-list {
+            margin-top: 20px;
+            display: grid;
+            gap: 15px;
+        }
+
+        .history-card {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-left: 4px solid var(--gold-light);
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        /* ==============================
+           RESPONSIVIDADE
+        ============================== */
+
+        @media (max-width: 767px) {
+            .hero-title {
+                font-size: 1.7rem;
+            }
+
+            .tabs-nav {
+                border-radius: 20px;
+            }
+
+            .tab-btn {
+                font-size: 0.75rem;
+                padding: 9px 12px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .summary-box {
+                font-size: 1.05rem;
+            }
+
+            .history-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* ==============================
+           USUÁRIOS / TELA DE LOGIN
+        ============================== */
+
+        body.login-locked {
+            overflow: hidden;
+        }
+
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background:
+                radial-gradient(circle at 50% 30%, rgba(27, 48, 34, 0.35), transparent 45%),
+                #000;
+            backdrop-filter: blur(8px);
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-card {
+            width: min(440px, 100%);
+            background: rgba(7, 13, 9, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.95),
+                0 0 35px rgba(74, 222, 128, 0.08),
+                inset 0 0 25px rgba(27, 48, 34, 0.2);
+            text-align: center;
+            position: relative;
+            animation: loginCardIn 0.45s ease;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-green), var(--gold-light), transparent);
+        }
+
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 15px rgba(74, 222, 128, 0.25));
+        }
+
+        .login-title {
+            margin: 0 0 6px;
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fff, var(--gold-light), var(--neon-green), var(--gold-light), #fff);
+            background-size: 300% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 4s linear infinite;
+        }
+
+        .login-subtitle {
+            margin: 0 0 22px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .user-list {
+            display: grid;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .user-option {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.25s ease;
+        }
+
+        .user-option:hover {
+            border-color: var(--neon-green);
+            background: rgba(74, 222, 128, 0.06);
+            transform: translateY(-2px);
+            box-shadow: 0 0 18px rgba(74, 222, 128, 0.12);
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+            border: 1px solid var(--neon-green);
+            font-size: 1.2rem;
+        }
+
+        .user-option strong {
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .user-option small {
+            display: block;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .login-new-user {
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed var(--gold-dark);
+            border-radius: 10px;
+            background: rgba(253, 224, 71, 0.04);
+            color: var(--gold-light);
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+
+        .login-new-user:hover {
+            background: rgba(253, 224, 71, 0.09);
+            box-shadow: 0 0 15px rgba(253, 224, 71, 0.12);
+        }
+
+        .new-user-form {
+            display: none;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .new-user-form.active {
+            display: block;
+            animation: tabFadeIn 0.2s ease;
+        }
+
+        .new-user-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .new-user-actions button {
+            flex: 1;
+        }
+
+        .btn-cancel-user {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .current-user-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .current-user {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255,255,255,0.025);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .current-user strong {
+            color: var(--gold-light);
+        }
+
+        .switch-user-btn {
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 10px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .switch-user-btn:hover {
+            color: var(--text-main);
+            border-color: var(--neon-green);
+        }
+
+        @keyframes loginCardIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (max-width: 767px) {
+            .login-card {
+                padding: 22px 18px;
+            }
+
+            .current-user-bar {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+    </style>
+</head>
+
+<body class="login-locked">
+
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">💰</div>
+            <h1 class="login-title">PLANEJAMENTO DE FINANÇAS</h1>
+            <p class="login-subtitle">Selecione um usuário para acessar seus dados financeiros</p>
+
+            <div id="userList" class="user-list"></div>
+
+            <button type="button" class="login-new-user" onclick="mostrarNovoUsuario()">
+                ＋ Novo usuário
+            </button>
+
+            <form id="newUserForm" class="new-user-form" onsubmit="criarUsuario(event)">
+                <label for="novoUsuarioNome">Nome do usuário</label>
+                <input
+                    type="text"
+                    id="novoUsuarioNome"
+                    maxlength="40"
+                    required
+                    autocomplete="off"
+                    placeholder="Ex: Angelo"
+                >
+
+                <div class="new-user-actions">
+                    <button type="button" class="btn-cancel-user" onclick="cancelarNovoUsuario()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-submit" style="margin-top:0;">
+                        Criar usuário
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+<div class="container">
+
+    <div class="current-user-bar">
+        <span class="current-user">👤 <strong id="currentUserName">Usuário</strong></span>
+        <button type="button" class="switch-user-btn" onclick="trocarUsuario()">
+            Trocar usuário
+        </button>
+    </div>
+
+    <div class="hero-title">
+        PLANEJAMENTO DE FINANÇAS
+    </div>
+
+    <!-- ==============================
+         NAVEGAÇÃO DAS ABAS
+    ============================== -->
+
+    <nav class="tabs-nav">
+
+        <button
+            type="button"
+            class="tab-btn active"
+            data-tab="aba-inicio"
+            onclick="openTab('aba-inicio', this)"
+        >
+            Início
+        </button>
+
+        <button
+            type="button"
+            class="tab-btn"
+            data-tab="aba-lancamentos"
+            onclick="openTab('aba-lancamentos', this)"
+        >
+            Lançamentos
+        </button>
+
+        <button
+            type="button"
+            class="tab-btn"
+            data-tab="aba-extrato"
+            onclick="openTab('aba-extrato', this)"
+        >
+            Extrato
+        </button>
+
+        <button
+            type="button"
+            class="tab-btn"
+            data-tab="aba-resumo"
+            onclick="openTab('aba-resumo', this)"
+        >
+            Resumo Final
+        </button>
+
+    </nav>
+
+    <!-- ==============================
+         ABA 1 - INÍCIO
+    ============================== -->
+
+    <div
+        id="aba-inicio"
+        class="tab-content active use-grid grid-2"
+    >
+
+        <div
+            class="flex"
+            style="flex-direction: column; gap: 20px;"
+        >
+
+            <div class="card">
+
+                <label>
+                    MÊS DE REFERÊNCIA
+                </label>
+
+                <div class="flex">
+
+                    <div class="flex-1">
+
+                        <select
+                            id="selectMesInicio"
+                            onchange="renderInicio()"
+                        >
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <select
+                            id="selectAnoInicio"
+                            onchange="renderInicio()"
+                        >
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>
+                    Metas de Economia
+                </h2>
+
+                <div class="flex">
+
+                    <div class="flex-1">
+
+                        <label>
+                            Meta (R$)
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="metaValor"
+                            placeholder="0.00"
+                            oninput="salvarMeta()"
+                        >
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <label>
+                            Guardado (R$)
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="guardadoValor"
+                            placeholder="0.00"
+                            oninput="salvarMeta()"
+                        >
+
+                    </div>
+
+                </div>
+
+                <p
+                    id="statusMeta"
+                    style="
+                        margin: 15px 0 0 0;
+                        font-size: 0.95rem;
+                        color: var(--gold-light);
+                        font-weight: 600;
+                    "
+                >
+                    Progresso: R$ 0,00 / R$ 0,00
+                </p>
+
+            </div>
+
+        </div>
+
+        <div
+            class="card"
+            id="blocoGraficoDonut"
+        >
+
+            <h2>
+                Distribuição de Despesas
+            </h2>
+
+            <div class="chart-wrapper">
+
+                <canvas
+                    id="graficoDonut"
+                    width="250"
+                    height="250"
+                ></canvas>
+
+                <div
+                    class="chart-legend"
+                    id="graficoLegenda"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==============================
+         ABA 2 - LANÇAMENTOS
+    ============================== -->
+
+    <div
+        id="aba-lancamentos"
+        class="tab-content use-grid grid-2"
+        hidden
+    >
+
+        <div class="card">
+
+            <h2>
+                1. Receitas & Despesas Comuns
+            </h2>
+
+            <form
+                id="transacaoForm"
+                onsubmit="adicionarTransacao(event)"
+            >
+
+                <div class="flex">
+
+                    <div class="flex-1">
+
+                        <label>
+                            Tipo
+                        </label>
+
+                        <select
+                            id="tipo"
+                            onchange="alternarCampos()"
+                        >
+                            <option value="despesa">
+                                Despesa (Saída)
+                            </option>
+
+                            <option value="receita">
+                                Receita (Entrada)
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div
+                        class="flex-1"
+                        id="divCat"
+                    >
+
+                        <label>
+                            Categoria
+                        </label>
+
+                        <select
+                            id="categoria"
+                            onchange="atualizarSub()"
+                        >
+                            <option value="Alimentação">
+                                Alimentação
+                            </option>
+
+                            <option value="Locomoção">
+                                Locomoção
+                            </option>
+
+                            <option value="Energia">
+                                Energia
+                            </option>
+
+                            <option value="Água">
+                                Água
+                            </option>
+
+                            <option value="Reparações">
+                                Reparações
+                            </option>
+
+                            <option value="Assinaturas">
+                                Assinaturas
+                            </option>
+
+                            <option value="Saúde">
+                                Saúde
+                            </option>
+
+                            <option value="Diversos">
+                                Diversos
+                            </option>
+
+                            <option value="Internet">
+                                Internet (Casa/Móvel)
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div
+                        class="flex-1"
+                        id="divSub"
+                    >
+
+                        <label>
+                            Subtipo
+                        </label>
+
+                        <select id="subtipo"></select>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="flex"
+                    style="margin-top: 15px;"
+                >
+
+                    <div class="flex-1">
+
+                        <label>
+                            Descrição Opcional
+                        </label>
+
+                        <input
+                            type="text"
+                            id="descricao"
+                            placeholder="Ex: Mercado extra"
+                        >
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <label>
+                            Valor (R$)
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="valor"
+                            required
+                            placeholder="0.00"
+                        >
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn-submit"
+                >
+                    Salvar Movimentação
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="card">
+
+            <h2>
+                2. Compras no Cartão (Parceladas)
+            </h2>
+
+            <form
+                id="cartaoForm"
+                onsubmit="adicionarCompraCartao(event)"
+            >
+
+                <div class="flex">
+
+                    <div class="flex-1">
+
+                        <label>
+                            Descrição da Compra
+                        </label>
+
+                        <input
+                            type="text"
+                            id="descCartao"
+                            required
+                            placeholder="Ex: Geladeira..."
+                        >
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <label>
+                            Valor Total (R$)
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="valorCartao"
+                            required
+                            placeholder="0.00"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="flex"
+                    style="margin-top: 15px;"
+                >
+
+                    <div class="flex-1">
+
+                        <label>
+                            Nº de Parcelas
+                        </label>
+
+                        <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            max="120"
+                            id="parcelasCartao"
+                            required
+                            placeholder="Ex: 12"
+                        >
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <label>
+                            Mês da 1ª Parcela
+                        </label>
+
+                        <input
+                            type="month"
+                            id="mesInicioCartao"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn-submit"
+                    style="
+                        background: linear-gradient(
+                            135deg,
+                            var(--gold-dark),
+                            #9a7d36
+                        );
+                        border-color: var(--gold-light);
+                    "
+                >
+                    Registrar no Cartão
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ==============================
+         ABA 3 - EXTRATO
+    ============================== -->
+
+    <div
+        id="aba-extrato"
+        class="tab-content"
+        hidden
+    >
+
+        <div
+            class="card"
+            style="margin-bottom: 20px;"
+        >
+
+            <label>
+                SELECIONAR MÊS DO EXTRATO
+            </label>
+
+            <div class="flex">
+
+                <div class="flex-1">
+
+                    <select
+                        id="selectMesExtrato"
+                        onchange="renderExtrato()"
+                    >
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+
+                </div>
+
+                <div class="flex-1">
+
+                    <select
+                        id="selectAnoExtrato"
+                        onchange="renderExtrato()"
+                    >
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h2>
+                Extrato Consolidado
+            </h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>
+                                Detalhes (Categoria / Descrição)
+                            </th>
+
+                            <th>
+                                Tipo
+                            </th>
+
+                            <th>
+                                Valor
+                            </th>
+
+                            <th>
+                                Ação
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tabelaCorpo"></tbody>
+
+                </table>
+
+            </div>
+
+            <div class="summary-box">
+
+                <span>
+                    Saldo Líquido:
+                </span>
+
+                <span id="saldoTotal">
+                    R$ 0,00
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==============================
+         ABA 4 - RESUMO FINAL
+    ============================== -->
+
+    <div
+        id="aba-resumo"
+        class="tab-content"
+        hidden
+    >
+
+        <div class="card">
+
+            <h2>
+                Gráfico de Evolução do Patrimônio
+            </h2>
+
+            <div class="chart-wrapper">
+
+                <canvas
+                    id="graficoHistorico"
+                    width="800"
+                    height="300"
+                ></canvas>
+
+            </div>
+
+            <div
+                id="historicoLista"
+                class="history-list"
+            >
+                <!-- Preenchido via JS -->
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    /* ==============================
+       CATEGORIAS / SUBTIPOS
+    ============================== */
+
+    const subs = {
+
+        "Alimentação": [
+            "Mercado",
+            "Besteiras/Delivery",
+            "Restaurante"
+        ],
+
+        "Locomoção": [
+            "Carro",
+            "Moto",
+            "Uber",
+            "Transporte Público"
+        ],
+
+        "Energia": [
+            "Padrão"
+        ],
+
+        "Água": [
+            "Padrão"
+        ],
+
+        "Reparações": [
+            "Casa",
+            "Moto",
+            "Carro"
+        ],
+
+        "Assinaturas": [
+            "Spotify",
+            "Netflix",
+            "Outros"
+        ],
+
+        "Saúde": [
+            "Remédios",
+            "Plano de Saúde",
+            "Consultas/Cirurgias"
+        ],
+
+        "Diversos": [
+            "Geral",
+            "Lazer",
+            "Roupas"
+        ],
+
+        "Internet": [
+            "Móvel (Celular)",
+            "Residencial"
+        ]
+
+    };
+
+    const palette = [
+        '#4ade80',
+        '#fde047',
+        '#3b533d',
+        '#ca8a04',
+        '#689669',
+        '#8B5A2B',
+        '#1b3022',
+        '#facc15'
+    ];
+
+    const CHAVE_CARTOES = 'cartoes_globais';
+
+
+    /* ==============================
+       SISTEMA DE USUÁRIOS
+       Cada usuário possui seus próprios
+       lançamentos, cartões e metas.
+    ============================== */
+
+    const CHAVE_USUARIOS = 'financas_usuarios';
+    const CHAVE_USUARIO_ATIVO = 'financas_usuario_ativo';
+    let usuarioAtivo = null;
+
+    function normalizarNomeUsuario(nome) {
+        return nome.trim().replace(/\s+/g, ' ');
+    }
+
+    function chaveUsuarioAtual(chave) {
+        if (!usuarioAtivo) return chave;
+        return 'usuario_' + usuarioAtivo.id + '_' + chave;
+    }
+
+    function getStorage(chave, padrao = null) {
+        const valor = localStorage.getItem(chaveUsuarioAtual(chave));
+        if (valor === null) return padrao;
+        try {
+            return JSON.parse(valor);
+        } catch {
+            return padrao;
+        }
+    }
+
+    function setStorage(chave, valor) {
+        localStorage.setItem(
+            chaveUsuarioAtual(chave),
+            JSON.stringify(valor)
+        );
+    }
+
+    function getUsuarios() {
+        try {
+            return JSON.parse(
+                localStorage.getItem(CHAVE_USUARIOS)
+            ) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    function salvarUsuarios(usuarios) {
+        localStorage.setItem(
+            CHAVE_USUARIOS,
+            JSON.stringify(usuarios)
+        );
+    }
+
+    function criarIdUsuario() {
+        return 'u_' + Date.now().toString(36) + '_' +
+            Math.random().toString(36).slice(2, 8);
+    }
+
+    function prepararUsuarios() {
+        let usuarios = getUsuarios();
+
+        /*
+         * Se esta for a primeira vez usando a versão com usuários
+         * e já existirem dados antigos, eles são preservados em
+         * um usuário inicial.
+         */
+        if (usuarios.length === 0) {
+            const possuiDadosAntigos =
+                Object.keys(localStorage).some(chave =>
+                    chave === CHAVE_CARTOES ||
+                    chave.startsWith('financas_') ||
+                    chave.startsWith('meta_')
+                );
+
+            if (possuiDadosAntigos) {
+                const usuarioInicial = {
+                    id: criarIdUsuario(),
+                    nome: 'Usuário Principal'
+                };
+
+                usuarios.push(usuarioInicial);
+                salvarUsuarios(usuarios);
+
+                migrarDadosAntigos(usuarioInicial.id);
+
+                localStorage.setItem(
+                    CHAVE_USUARIO_ATIVO,
+                    usuarioInicial.id
+                );
+            }
+        }
+
+        return usuarios;
+    }
+
+    function migrarDadosAntigos(idUsuario) {
+        const prefixo = 'usuario_' + idUsuario + '_';
+
+        Object.keys(localStorage).forEach(chave => {
+            if (
+                chave === CHAVE_CARTOES ||
+                chave.startsWith('financas_') ||
+                chave.startsWith('meta_')
+            ) {
+                const destino = prefixo + chave;
+
+                if (!localStorage.getItem(destino)) {
+                    localStorage.setItem(
+                        destino,
+                        localStorage.getItem(chave)
+                    );
+                }
+            }
+        });
+    }
+
+    function renderUsuarios() {
+        const lista = document.getElementById('userList');
+        if (!lista) return;
+
+        const usuarios = getUsuarios();
+        lista.innerHTML = '';
+
+        if (usuarios.length === 0) {
+            lista.innerHTML = `
+                <div style="
+                    padding: 18px;
+                    border: 1px dashed var(--border);
+                    border-radius: 12px;
+                    color: var(--text-muted);
+                    font-size: 0.9rem;
+                ">
+                    Nenhum usuário cadastrado.<br>
+                    Crie o primeiro usuário abaixo.
+                </div>
+            `;
+            return;
+        }
+
+        usuarios.forEach(usuario => {
+            const botao = document.createElement('button');
+            botao.type = 'button';
+            botao.className = 'user-option';
+            botao.onclick = () => selecionarUsuario(usuario.id);
+
+            const inicial =
+                usuario.nome.charAt(0).toUpperCase();
+
+            botao.innerHTML = `
+                <span class="user-avatar">${inicial}</span>
+                <span>
+                    <strong>${escapeHtml(usuario.nome)}</strong>
+                    <small>Acessar planejamento financeiro</small>
+                </span>
+            `;
+
+            lista.appendChild(botao);
+        });
+    }
+
+    function escapeHtml(valor) {
+        return String(valor)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function mostrarNovoUsuario() {
+        const form = document.getElementById('newUserForm');
+        const input = document.getElementById('novoUsuarioNome');
+
+        if (!form) return;
+
+        form.classList.add('active');
+
+        if (input) {
+            input.focus();
+        }
+    }
+
+    function cancelarNovoUsuario() {
+        const form = document.getElementById('newUserForm');
+        const input = document.getElementById('novoUsuarioNome');
+
+        if (form) {
+            form.classList.remove('active');
+            form.reset();
+        }
+
+        if (input) {
+            input.value = '';
+        }
+    }
+
+    function criarUsuario(event) {
+        event.preventDefault();
+
+        const input =
+            document.getElementById('novoUsuarioNome');
+
+        const nome =
+            normalizarNomeUsuario(input.value);
+
+        if (!nome) return;
+
+        const usuarios = getUsuarios();
+
+        const nomeExiste = usuarios.some(
+            usuario =>
+                usuario.nome.toLowerCase() === nome.toLowerCase()
+        );
+
+        if (nomeExiste) {
+            alert('Já existe um usuário com esse nome.');
+            return;
+        }
+
+        const novoUsuario = {
+            id: criarIdUsuario(),
+            nome
+        };
+
+        usuarios.push(novoUsuario);
+        salvarUsuarios(usuarios);
+
+        selecionarUsuario(novoUsuario.id);
+    }
+
+    function selecionarUsuario(id) {
+        const usuarios = getUsuarios();
+
+        const usuario =
+            usuarios.find(u => u.id === id);
+
+        if (!usuario) return;
+
+        usuarioAtivo = usuario;
+
+        localStorage.setItem(
+            CHAVE_USUARIO_ATIVO,
+            usuario.id
+        );
+
+        document.body.classList.remove('login-locked');
+
+        const login =
+            document.getElementById('loginScreen');
+
+        if (login) {
+            login.classList.add('hidden');
+        }
+
+        const nomeElemento =
+            document.getElementById('currentUserName');
+
+        if (nomeElemento) {
+            nomeElemento.textContent = usuario.nome;
+        }
+
+        cancelarNovoUsuario();
+
+        /*
+         * Atualiza a interface com os dados do usuário selecionado.
+         */
+        atualizarSub();
+        alternarCampos();
+        renderInicio();
+
+        if (abaAtiva === 'aba-extrato') {
+            renderExtrato();
+        }
+
+        if (abaAtiva === 'aba-resumo') {
+            renderResumo();
+        }
+    }
+
+    function trocarUsuario() {
+        usuarioAtivo = null;
+
+        localStorage.removeItem(
+            CHAVE_USUARIO_ATIVO
+        );
+
+        document.body.classList.add('login-locked');
+
+        const login =
+            document.getElementById('loginScreen');
+
+        if (login) {
+            login.classList.remove('hidden');
+        }
+
+        renderUsuarios();
+    }
+
+    function iniciarSistemaUsuarios() {
+        prepararUsuarios();
+
+        const usuarios = getUsuarios();
+
+        const usuarioSalvo =
+            localStorage.getItem(CHAVE_USUARIO_ATIVO);
+
+        if (
+            usuarioSalvo &&
+            usuarios.some(u => u.id === usuarioSalvo)
+        ) {
+            selecionarUsuario(usuarioSalvo);
+        } else {
+            document.body.classList.add('login-locked');
+
+            const login =
+                document.getElementById('loginScreen');
+
+            if (login) {
+                login.classList.remove('hidden');
+            }
+
+            renderUsuarios();
+        }
+    }
+
+
+    let abaAtiva = 'aba-inicio';
+
+    /* ==============================
+       CONTROLE DAS ABAS
+       CORREÇÃO PRINCIPAL
+    ============================== */
+
+    function openTab(tabId, btn) {
+
+        const abas = document.querySelectorAll('.tab-content');
+        const botoes = document.querySelectorAll('.tab-btn');
+
+        /* Esconde TODAS as abas */
+        abas.forEach(aba => {
+
+            aba.classList.remove('active');
+            aba.hidden = true;
+            aba.setAttribute('aria-hidden', 'true');
+
+        });
+
+        /* Desativa TODOS os botões */
+        botoes.forEach(botao => {
+
+            botao.classList.remove('active');
+            botao.setAttribute('aria-selected', 'false');
+
+        });
+
+        /* Localiza a aba solicitada */
+        const abaSelecionada = document.getElementById(tabId);
+
+        if (!abaSelecionada) {
+            console.error('Aba não encontrada:', tabId);
+            return;
+        }
+
+        /* Mostra somente a aba escolhida */
+        abaSelecionada.hidden = false;
+        abaSelecionada.classList.add('active');
+        abaSelecionada.setAttribute('aria-hidden', 'false');
+
+        /* Ativa o botão */
+        if (btn) {
+
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+        }
+
+        abaAtiva = tabId;
+
+        /* Atualizações específicas */
+        if (tabId === 'aba-inicio') {
+            renderInicio();
+        }
+
+        if (tabId === 'aba-extrato') {
+            renderExtrato();
+        }
+
+        if (tabId === 'aba-resumo') {
+            renderResumo();
+        }
+
+    }
+
+    /* ==============================
+       INICIALIZAÇÃO
+    ============================== */
+
+    window.addEventListener('load', () => {
+
+        const dNow = new Date();
+
+        const anoAtual = dNow
+            .getFullYear()
+            .toString();
+
+        const mesAtual = String(
+            dNow.getMonth() + 1
+        ).padStart(2, '0');
+
+        const selectMesInicio =
+            document.getElementById('selectMesInicio');
+
+        const selectAnoInicio =
+            document.getElementById('selectAnoInicio');
+
+        const selectMesExtrato =
+            document.getElementById('selectMesExtrato');
+
+        const selectAnoExtrato =
+            document.getElementById('selectAnoExtrato');
+
+        const mesInicioCartao =
+            document.getElementById('mesInicioCartao');
+
+        if (selectMesInicio) {
+            selectMesInicio.value = mesAtual;
+        }
+
+        if (selectAnoInicio) {
+
+            if (
+                Array.from(selectAnoInicio.options)
+                    .some(option => option.value === anoAtual)
+            ) {
+
+                selectAnoInicio.value = anoAtual;
+
+            }
+
+        }
+
+        if (selectMesExtrato) {
+            selectMesExtrato.value = mesAtual;
+        }
+
+        if (selectAnoExtrato) {
+
+            if (
+                Array.from(selectAnoExtrato.options)
+                    .some(option => option.value === anoAtual)
+            ) {
+
+                selectAnoExtrato.value = anoAtual;
+
+            }
+
+        }
+
+        const mesStr =
+            `${anoAtual}-${mesAtual}`;
+
+        if (mesInicioCartao) {
+            mesInicioCartao.value = mesStr;
+        }
+
+        atualizarSub();
+        alternarCampos();
+        renderInicio();
+
+        /* Garante que somente a aba inicial esteja visível */
+        document
+            .querySelectorAll('.tab-content')
+            .forEach(aba => {
+
+                if (aba.id === 'aba-inicio') {
+
+                    aba.hidden = false;
+                    aba.classList.add('active');
+
+                } else {
+
+                    aba.hidden = true;
+                    aba.classList.remove('active');
+
+                }
+
+            });
+
+    });
+
+    /* ==============================
+       DATA
+    ============================== */
+
+    function getMesAnoInicioStr() {
+
+        const m =
+            document.getElementById(
+                'selectMesInicio'
+            ).value;
+
+        const a =
+            document.getElementById(
+                'selectAnoInicio'
+            ).value;
+
+        return `${a}-${m}`;
+
+    }
+
+    function getMesAnoExtratoStr() {
+
+        const m =
+            document.getElementById(
+                'selectMesExtrato'
+            ).value;
+
+        const a =
+            document.getElementById(
+                'selectAnoExtrato'
+            ).value;
+
+        return `${a}-${m}`;
+
+    }
+
+    /* ==============================
+       SUBTIPOS
+    ============================== */
+
+    function atualizarSub() {
+
+        const categoria =
+            document.getElementById('categoria');
+
+        const sub =
+            document.getElementById('subtipo');
+
+        if (!categoria || !sub) {
+            return;
+        }
+
+        const cat = categoria.value;
+
+        sub.innerHTML = '';
+
+        (
+            subs[cat] || ['Geral']
+        ).forEach(s => {
+
+            const opt =
+                document.createElement('option');
+
+            opt.value = s;
+            opt.textContent = s;
+
+            sub.appendChild(opt);
+
+        });
+
+    }
+
+    /* ==============================
+       RECEITA / DESPESA
+    ============================== */
+
+    function alternarCampos() {
+
+        const tipo =
+            document.getElementById('tipo');
+
+        const divCat =
+            document.getElementById('divCat');
+
+        const divSub =
+            document.getElementById('divSub');
+
+        if (!tipo || !divCat || !divSub) {
+            return;
+        }
+
+        if (tipo.value === 'receita') {
+
+            divCat.style.display = 'none';
+            divSub.style.display = 'none';
+
+        } else {
+
+            divCat.style.display = 'block';
+            divSub.style.display = 'block';
+
+        }
+
+    }
+
+    /* ==============================
+       OBTÉM DADOS DO MÊS
+    ============================== */
+
+    function getDadosMes(mesStr) {
+
+        if (!usuarioAtivo) {
+            return {
+                receitas: 0,
+                despesas: 0,
+                gastosPorCategoria: {},
+                saldo: 0,
+                transacoes: []
+            };
+        }
+
+        const transacoes =
+            JSON.parse(
+                getStorage(
+                    'financas_' + mesStr,
+                    []
+                )
+            ) || [];
+
+        const cartoes =
+            JSON.parse(
+                getStorage(
+                    CHAVE_CARTOES,
+                    []
+                )
+            ) || [];
+
+        const [
+            anoSel,
+            mesSel
+        ] = mesStr
+            .split('-')
+            .map(Number);
+
+        let receitas = 0;
+        let despesas = 0;
+
+        let gastosPorCategoria = {};
+
+        let transacoesProcessadas = [];
+
+        transacoes.forEach(
+            (item, idx) => {
+
+                if (item.tipo === 'receita') {
+
+                    receitas += Number(
+                        item.valor
+                    );
+
+                } else {
+
+                    despesas += Number(
+                        item.valor
+                    );
+
+                    gastosPorCategoria[item.cat] =
+                        (
+                            gastosPorCategoria[item.cat]
+                            || 0
+                        ) +
+                        Number(item.valor);
+
+                }
+
+                transacoesProcessadas.push({
+
+                    ...item,
+
+                    idxOrigem: idx,
+
+                    isCartao: false
+
+                });
+
+            }
+        );
+
+        cartoes.forEach(
+            (cartao, idx) => {
+
+                const [
+                    anoIni,
+                    mesIni
+                ] = cartao.mesInicio
+                    .split('-')
+                    .map(Number);
+
+                const diffMeses =
+                    (
+                        anoSel - anoIni
+                    ) * 12 +
+                    (
+                        mesSel - mesIni
+                    );
+
+                if (
+                    diffMeses >= 0 &&
+                    diffMeses < Number(cartao.parcelas)
+                ) {
+
+                    const valorParcela =
+                        Number(
+                            cartao.valorTotal
+                        ) /
+                        Number(
+                            cartao.parcelas
+                        );
+
+                    despesas += valorParcela;
+
+                    gastosPorCategoria[
+                        "Fatura de Cartão"
+                    ] =
+                        (
+                            gastosPorCategoria[
+                                "Fatura de Cartão"
+                            ] || 0
+                        ) +
+                        valorParcela;
+
+                    transacoesProcessadas.push({
+
+                        tipo: 'despesa',
+
+                        cat: 'Cartão de Crédito',
+
+                        desc: cartao.desc,
+
+                        valor: valorParcela,
+
+                        parcelaAtual:
+                            diffMeses + 1,
+
+                        totalParcelas:
+                            cartao.parcelas,
+
+                        idxOrigem: idx,
+
+                        isCartao: true
+
+                    });
+
+                }
+
+            }
+        );
+
+        return {
+
+            receitas,
+
+            despesas,
+
+            gastosPorCategoria,
+
+            saldo:
+                receitas - despesas,
+
+            transacoes:
+                transacoesProcessadas
+
+        };
+
+    }
+
+    /* ==============================
+       INÍCIO
+    ============================== */
+
+    function renderInicio() {
+
+        const mesStr =
+            getMesAnoInicioStr();
+
+        const dadosMeta =
+            JSON.parse(
+                getStorage(
+                    'meta_' + mesStr,
+                    { meta: '', guardado: '' }
+                )
+            ) || {
+                meta: '',
+                guardado: ''
+            };
+
+        const metaValor =
+            document.getElementById(
+                'metaValor'
+            );
+
+        const guardadoValor =
+            document.getElementById(
+                'guardadoValor'
+            );
+
+        if (metaValor) {
+            metaValor.value =
+                dadosMeta.meta;
+        }
+
+        if (guardadoValor) {
+            guardadoValor.value =
+                dadosMeta.guardado;
+        }
+
+        atualizarTextoMeta();
+
+        const dados =
+            getDadosMes(mesStr);
+
+        desenharGraficoDonut(
+            dados.gastosPorCategoria,
+            dados.despesas
+        );
+
+    }
+
+    /* ==============================
+       SALVAR META
+    ============================== */
+
+    function salvarMeta() {
+
+        const mesStr =
+            getMesAnoInicioStr();
+
+        const meta =
+            document.getElementById(
+                'metaValor'
+            ).value;
+
+        const guardado =
+            document.getElementById(
+                'guardadoValor'
+            ).value;
+
+        setStorage(
+            'meta_' + mesStr,
+            {
+                meta,
+                guardado
+            }
+        );
+
+        atualizarTextoMeta();
+
+    }
+
+    /* ==============================
+       TEXTO DA META
+    ============================== */
+
+    function atualizarTextoMeta() {
+
+        const metaElemento =
+            document.getElementById(
+                'metaValor'
+            );
+
+        const guardadoElemento =
+            document.getElementById(
+                'guardadoValor'
+            );
+
+        const status =
+            document.getElementById(
+                'statusMeta'
+            );
+
+        if (
+            !metaElemento ||
+            !guardadoElemento ||
+            !status
+        ) {
+            return;
+        }
+
+        const m =
+            Number(metaElemento.value) || 0;
+
+        const g =
+            Number(guardadoElemento.value) || 0;
+
+        const pct =
+            m > 0
+                ? ((g / m) * 100).toFixed(1)
+                : 0;
+
+        status.textContent =
+            `Progresso: R$ ${g.toFixed(2)} de R$ ${m.toFixed(2)} (${pct}%)`;
+
+    }
+
+    /* ==============================
+       EXTRATO
+    ============================== */
+
+    function renderExtrato() {
+
+        const mesStr =
+            getMesAnoExtratoStr();
+
+        const dados =
+            getDadosMes(mesStr);
+
+        const corpo =
+            document.getElementById(
+                'tabelaCorpo'
+            );
+
+        if (!corpo) {
+            return;
+        }
+
+        corpo.innerHTML = '';
+
+        dados.transacoes.forEach(
+            t => {
+
+                const tr =
+                    document.createElement('tr');
+
+                if (t.isCartao) {
+
+                    tr.innerHTML = `
+
+                        <td>
+                            <b>${t.cat}</b>
+
+                            <span class="badge">
+                                Parcela
+                                ${t.parcelaAtual}/${t.totalParcelas}
+                            </span>
+
+                            <br>
+
+                            <small
+                                style="color: var(--text-muted);"
+                            >
+                                ${t.desc}
+                            </small>
+                        </td>
+
+                        <td style="color: var(--danger)">
+                            DESPESA
+                        </td>
+
+                        <td>
+                            R$ ${Number(t.valor).toFixed(2)}
+                        </td>
+
+                        <td>
+                            <button
+                                class="btn-delete"
+                                onclick="removerCartao(${t.idxOrigem})"
+                            >
+                                Excluir Todas
+                            </button>
+                        </td>
+
+                    `;
+
+                } else {
+
+                    const tipoTexto =
+                        t.tipo === 'receita'
+                            ? 'Receita'
+                            : t.cat;
+
+                    const corTipo =
+                        t.tipo === 'receita'
+                            ? 'var(--success)'
+                            : 'var(--danger)';
+
+                    tr.innerHTML = `
+
+                        <td>
+
+                            <b>
+                                ${tipoTexto}
+                            </b>
+
+                            <br>
+
+                            <small
+                                style="color: var(--text-muted);"
+                            >
+                                ${t.sub || ''}
+                                ${t.desc ? '- ' + t.desc : ''}
+                            </small>
+
+                        </td>
+
+                        <td style="color:${corTipo}">
+                            ${t.tipo.toUpperCase()}
+                        </td>
+
+                        <td>
+                            R$ ${Number(t.valor).toFixed(2)}
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="btn-delete"
+                                onclick="removerTransacaoNormal(${t.idxOrigem}, '${mesStr}')"
+                            >
+                                Excluir
+                            </button>
+
+                        </td>
+
+                    `;
+
+                }
+
+                corpo.appendChild(tr);
+
+            }
+        );
+
+        const saldoElemento =
+            document.getElementById(
+                'saldoTotal'
+            );
+
+        if (saldoElemento) {
+
+            saldoElemento.textContent =
+                `R$ ${dados.saldo.toFixed(2)}`;
+
+            saldoElemento.className =
+                dados.saldo >= 0
+                    ? 'positivo'
+                    : 'negativo';
+
+        }
+
+    }
+
+    /* ==============================
+       RESUMO FINAL
+    ============================== */
+
+    function renderResumo() {
+
+        const prefixoUsuario =
+            'usuario_' + usuarioAtivo.id + '_';
+
+        const chavesStorage =
+            Object.keys(localStorage);
+
+        let mesesSet = new Set();
+
+        chavesStorage.forEach(k => {
+
+            if (
+                k.startsWith(prefixoUsuario + 'financas_') ||
+                k.startsWith(prefixoUsuario + 'meta_')
+            ) {
+
+                const chaveLocal =
+                    k.slice(prefixoUsuario.length);
+
+                mesesSet.add(
+                    chaveLocal.split('_')[1]
+                );
+
+            }
+
+        });
+
+        const cartoes =
+            JSON.parse(
+                getStorage(
+                    CHAVE_CARTOES,
+                    []
+                )
+            ) || [];
+
+        cartoes.forEach(c => {
+
+            let [
+                ano,
+                mes
+            ] = c.mesInicio
+                .split('-')
+                .map(Number);
+
+            for (
+                let i = 0;
+                i < Number(c.parcelas);
+                i++
+            ) {
+
+                let m = mes + i;
+
+                let a =
+                    ano +
+                    Math.floor(
+                        (m - 1) / 12
+                    );
+
+                m =
+                    ((m - 1) % 12) + 1;
+
+                mesesSet.add(
+                    `${a}-${m
+                        .toString()
+                        .padStart(2, '0')}`
+                );
+
+            }
+
+        });
+
+        const mesesOrdenados =
+            Array.from(mesesSet)
+                .sort();
+
+        let dadosHistoricos = [];
+
+        mesesOrdenados.forEach(
+            mStr => {
+
+                const d =
+                    getDadosMes(mStr);
+
+                let maiorCat =
+                    'Nenhuma';
+
+                let maiorGasto = 0;
+
+                for (
+                    let cat in d.gastosPorCategoria
+                ) {
+
+                    if (
+                        d.gastosPorCategoria[cat]
+                        > maiorGasto
+                    ) {
+
+                        maiorGasto =
+                            d.gastosPorCategoria[cat];
+
+                        maiorCat = cat;
+
+                    }
+
+                }
+
+                dadosHistoricos.push({
+
+                    mes: mStr,
+
+                    guardado: d.saldo,
+
+                    maiorCategoria:
+                        maiorCat,
+
+                    gastoCategoria:
+                        maiorGasto
+
+                });
+
+            }
+        );
+
+        desenharGraficoHistorico(
+            dadosHistoricos
+        );
+
+        renderizarListaHistorica(
+            dadosHistoricos
+        );
+
+    }
+
+    /* ==============================
+       LISTA HISTÓRICA
+    ============================== */
+
+    function renderizarListaHistorica(
+        historico
+    ) {
+
+        const lista =
+            document.getElementById(
+                'historicoLista'
+            );
+
+        if (!lista) {
+            return;
+        }
+
+        lista.innerHTML = '';
+
+        [...historico]
+            .reverse()
+            .forEach(h => {
+
+                const div =
+                    document.createElement(
+                        'div'
+                    );
+
+                div.className =
+                    'history-card';
+
+                div.innerHTML = `
+
+                    <div>
+
+                        <h3
+                            style="
+                                margin: 0;
+                                color: var(--gold-light);
+                            "
+                        >
+                            ${h.mes}
+                        </h3>
+
+                        <small
+                            style="color: var(--text-muted);"
+                        >
+                            Maior Gasto:
+                            ${h.maiorCategoria}
+                            (R$ ${h.gastoCategoria.toFixed(2)})
+                        </small>
+
+                    </div>
+
+                    <div
+                        style="
+                            font-size: 1.2rem;
+                            font-weight: bold;
+                        "
+                        class="${
+                            h.guardado >= 0
+                                ? 'positivo'
+                                : 'negativo'
+                        }"
+                    >
+                        R$ ${h.guardado.toFixed(2)}
+                    </div>
+
+                `;
+
+                lista.appendChild(div);
+
+            });
+
+    }
+
+    /* ==============================
+       ADICIONAR TRANSAÇÃO
+    ============================== */
+
+    function adicionarTransacao(e) {
+
+        e.preventDefault();
+
+        const mesStr =
+            getMesAnoInicioStr();
+
+        const tipo =
+            document.getElementById(
+                'tipo'
+            ).value;
+
+        const valor =
+            document.getElementById(
+                'valor'
+            ).value;
+
+        const desc =
+            document.getElementById(
+                'descricao'
+            ).value;
+
+        const cat =
+            tipo === 'despesa'
+                ? document.getElementById(
+                    'categoria'
+                ).value
+                : 'Entrada Financeira';
+
+        const sub =
+            tipo === 'despesa'
+                ? document.getElementById(
+                    'subtipo'
+                ).value
+                : 'Salário/Rendimento';
+
+        const dados =
+            JSON.parse(
+                getStorage(
+                    'financas_' + mesStr,
+                    []
+                )
+            ) || [];
+
+        dados.push({
+
+            tipo,
+            cat,
+            sub,
+            desc,
+            valor
+
+        });
+
+        setStorage(
+            'financas_' + mesStr,
+            dados
+        );
+
+        document
+            .getElementById(
+                'transacaoForm'
+            )
+            .reset();
+
+        atualizarSub();
+        alternarCampos();
+
+        alert(
+            'Lançamento Comum Salvo com Sucesso!'
+        );
+
+    }
+
+    /* ==============================
+       ADICIONAR COMPRA CARTÃO
+    ============================== */
+
+    function adicionarCompraCartao(e) {
+
+        e.preventDefault();
+
+        const desc =
+            document.getElementById(
+                'descCartao'
+            ).value;
+
+        const valorTotal =
+            document.getElementById(
+                'valorCartao'
+            ).value;
+
+        const parcelas =
+            document.getElementById(
+                'parcelasCartao'
+            ).value;
+
+        const mesInicio =
+            document.getElementById(
+                'mesInicioCartao'
+            ).value;
+
+        const cartoes =
+            JSON.parse(
+                getStorage(
+                    CHAVE_CARTOES,
+                    []
+                )
+            ) || [];
+
+        cartoes.push({
+
+            desc,
+            valorTotal,
+            parcelas,
+            mesInicio
+
+        });
+
+        setStorage(
+            CHAVE_CARTOES,
+            cartoes
+        );
+
+        document
+            .getElementById(
+                'cartaoForm'
+            )
+            .reset();
+
+        /* Repõe o mês atual */
+        const dNow = new Date();
+
+        const mesAtual =
+            String(
+                dNow.getMonth() + 1
+            ).padStart(2, '0');
+
+        const anoAtual =
+            dNow.getFullYear();
+
+        document.getElementById(
+            'mesInicioCartao'
+        ).value =
+            `${anoAtual}-${mesAtual}`;
+
+        alert(
+            'Cartão de Crédito Registrado com Sucesso!'
+        );
+
+    }
+
+    /* ==============================
+       REMOVER TRANSAÇÃO
+    ============================== */
+
+    function removerTransacaoNormal(
+        idx,
+        mesStr
+    ) {
+
+        const dados =
+            JSON.parse(
+                getStorage(
+                    'financas_' + mesStr,
+                    []
+                )
+            ) || [];
+
+        dados.splice(
+            idx,
+            1
+        );
+
+        setStorage(
+            'financas_' + mesStr,
+            dados
+        );
+
+        if (
+            abaAtiva === 'aba-extrato'
+        ) {
+
+            renderExtrato();
+
+        }
+
+        if (
+            abaAtiva === 'aba-inicio'
+        ) {
+
+            renderInicio();
+
+        }
+
+    }
+
+    /* ==============================
+       REMOVER CARTÃO
+    ============================== */
+
+    function removerCartao(idx) {
+
+        if (
+            confirm(
+                'ATENÇÃO: Você apagará esta compra de todos os meses. Confirmar?'
+            )
+        ) {
+
+            const cartoes =
+                JSON.parse(
+                    getStorage(CHAVE_CARTOES, [])
+                ) || [];
+
+            cartoes.splice(
+                idx,
+                1
+            );
+
+            setStorage(CHAVE_CARTOES, cartoes);
+
+            if (
+                abaAtiva === 'aba-extrato'
+            ) {
+
+                renderExtrato();
+
+            }
+
+            if (
+                abaAtiva === 'aba-inicio'
+            ) {
+
+                renderInicio();
+
+            }
+
+        }
+
+    }
+
+    /* ==============================
+       GRÁFICO DONUT
+    ============================== */
+
+    function desenharGraficoDonut(
+        dadosCategoria,
+        totalDespesas
+    ) {
+
+        const canvas =
+            document.getElementById(
+                'graficoDonut'
+            );
+
+        const legendaContainer =
+            document.getElementById(
+                'graficoLegenda'
+            );
+
+        if (
+            !canvas ||
+            !legendaContainer
+        ) {
+            return;
+        }
+
+        const ctx =
+            canvas.getContext('2d');
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        legendaContainer.innerHTML = '';
+
+        const chaves =
+            Object.keys(
+                dadosCategoria
+            );
+
+        if (
+            chaves.length === 0 ||
+            totalDespesas === 0
+        ) {
+
+            ctx.fillStyle =
+                '#9ca3af';
+
+            ctx.font =
+                '14px system-ui';
+
+            ctx.textAlign =
+                'center';
+
+            ctx.textBaseline =
+                'middle';
+
+            ctx.fillText(
+                'Sem despesas',
+                canvas.width / 2,
+                canvas.height / 2
+            );
+
+            return;
+        }
+
+        const cx =
+            canvas.width / 2;
+
+        const cy =
+            canvas.height / 2;
+
+        const radius = 90;
+
+        const thickness = 40;
+
+        let startAngle =
+            -Math.PI / 2;
+
+        chaves.forEach(
+            (cat, index) => {
+
+                const valor =
+                    dadosCategoria[cat];
+
+                const sliceAngle =
+                    (
+                        valor /
+                        totalDespesas
+                    ) *
+                    2 *
+                    Math.PI;
+
+                const cor =
+                    palette[
+                        index %
+                        palette.length
+                    ];
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    cx,
+                    cy,
+                    radius,
+                    startAngle,
+                    startAngle +
+                    sliceAngle
+                );
+
+                ctx.lineWidth =
+                    thickness;
+
+                ctx.strokeStyle =
+                    cor;
+
+                ctx.stroke();
+
+                startAngle +=
+                    sliceAngle;
+
+                const porc =
+                    (
+                        (
+                            valor /
+                            totalDespesas
+                        ) *
+                        100
+                    ).toFixed(1);
+
+                legendaContainer.innerHTML += `
+
+                    <div class="legend-item">
+
+                        <div
+                            class="legend-color"
+                            style="background-color: ${cor}"
+                        ></div>
+
+                        ${cat}: ${porc}%
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+        ctx.fillStyle =
+            '#9ca3af';
+
+        ctx.font =
+            '14px system-ui';
+
+        ctx.textAlign =
+            'center';
+
+        ctx.textBaseline =
+            'middle';
+
+        ctx.fillText(
+            'Despesas',
+            cx,
+            cy - 10
+        );
+
+        ctx.fillStyle =
+            '#ffffff';
+
+        ctx.font =
+            'bold 16px system-ui';
+
+        ctx.fillText(
+            `R$ ${totalDespesas.toFixed(0)}`,
+            cx,
+            cy + 12
+        );
+
+    }
+
+    /* ==============================
+       GRÁFICO HISTÓRICO
+    ============================== */
+
+    function desenharGraficoHistorico(
+        historico
+    ) {
+
+        const canvas =
+            document.getElementById(
+                'graficoHistorico'
+            );
+
+        if (!canvas) {
+            return;
+        }
+
+        const ctx =
+            canvas.getContext('2d');
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        if (
+            historico.length === 0
+        ) {
+
+            ctx.fillStyle =
+                '#9ca3af';
+
+            ctx.font =
+                '14px system-ui';
+
+            ctx.textAlign =
+                'center';
+
+            ctx.textBaseline =
+                'middle';
+
+            ctx.fillText(
+                'Ainda não há dados históricos.',
+                canvas.width / 2,
+                canvas.height / 2
+            );
+
+            return;
+
+        }
+
+        const histRecente =
+            historico.slice(-12);
+
+        const margemEsq = 50;
+        const margemDir = 20;
+        const margemTopo = 20;
+        const margemBase = 30;
+
+        const w =
+            canvas.width -
+            margemEsq -
+            margemDir;
+
+        const h =
+            canvas.height -
+            margemTopo -
+            margemBase;
+
+        let maxVal =
+            Math.max(
+                ...histRecente.map(
+                    d => d.guardado
+                ),
+                100
+            );
+
+        let minVal =
+            Math.min(
+                ...histRecente.map(
+                    d => d.guardado
+                ),
+                0
+            );
+
+        let totalRange =
+            maxVal - minVal;
+
+        if (totalRange === 0) {
+            totalRange = 100;
+            maxVal = 100;
+            minVal = 0;
+        }
+
+        const zeroY =
+            margemTopo +
+            h -
+            (
+                (0 - minVal) /
+                totalRange
+            ) *
+            h;
+
+        /* Linha do zero */
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            margemEsq,
+            zeroY
+        );
+
+        ctx.lineTo(
+            canvas.width -
+            margemDir,
+            zeroY
+        );
+
+        ctx.strokeStyle =
+            '#243329';
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+        const barWidth =
+            (
+                w /
+                histRecente.length
+            ) *
+            0.6;
+
+        const gap =
+            w /
+            histRecente.length;
+
+        histRecente.forEach(
+            (data, index) => {
+
+                const x =
+                    margemEsq +
+                    gap * index +
+                    (
+                        gap -
+                        barWidth
+                    ) / 2;
+
+                const barHeight =
+                    Math.abs(
+                        data.guardado /
+                        totalRange
+                    ) *
+                    h;
+
+                ctx.fillStyle =
+                    data.guardado >= 0
+                        ? '#4ade80'
+                        : '#f87171';
+
+                if (
+                    data.guardado >= 0
+                ) {
+
+                    ctx.fillRect(
+                        x,
+                        zeroY -
+                        barHeight,
+                        barWidth,
+                        barHeight
+                    );
+
+                } else {
+
+                    ctx.fillRect(
+                        x,
+                        zeroY,
+                        barWidth,
+                        barHeight
+                    );
+
+                }
+
+                ctx.fillStyle =
+                    '#9ca3af';
+
+                ctx.font =
+                    '10px system-ui';
+
+                ctx.textAlign =
+                    'center';
+
+                ctx.fillText(
+                    data.mes.slice(2),
+                    x +
+                    barWidth / 2,
+                    canvas.height - 10
+                );
+
+            }
+        );
+
+    }
+
+    document.addEventListener('DOMContentLoaded', iniciarSistemaUsuarios);
+</script>
+
+</body>
+</html>
